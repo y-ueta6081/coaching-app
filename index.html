@@ -58,6 +58,7 @@ button:disabled{opacity:.5;cursor:not-allowed;}
 
 const API_URL = "/api/chat";
 let lpNum = null;
+let history = [];
 
 function calcLP(s){
   const d=s.replace(/\D/g,'').split('').map(Number);
