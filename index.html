@@ -55,10 +55,8 @@ button:disabled{opacity:.5;cursor:not-allowed;}
   <p class="hint">Enterで送信　／　Shift+Enterで改行</p>
 </footer>
 <script>
-const API_KEY = "AQ.Ab8RN6LHrR_-RqXid7RAuJ8ETw1e-F-P0nMRIMZ8MeqoAbno8w";
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
 
-let history = [];
+const API_URL = "/api/chat";
 let lpNum = null;
 
 function calcLP(s){
