@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数秘×内観 自分再発見コーチング</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Shippori+Mincho:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:#0f0c1a;color:#e8e0f0;min-height:100vh;display:flex;flex-direction:column;}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse at 20% 10%,rgba(120,60,180,.18) 0%,transparent 55%),radial-gradient(ellipse at 80% 90%,rgba(60,120,200,.14) 0%,transparent 55%);pointer-events:none;}
+header{position:sticky;top:0;z-index:10;background:rgba(15,12,26,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(180,140,255,.15);padding:12px 20px;}
+.hi{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+.icon{font-size:28px;}
+.ttl{font-family:'Shippori Mincho',serif;font-size:18px;font-weight:600;color:#d4b8ff;letter-spacing:.06em;}
+.sub{font-size:11px;color:rgba(200,180,240,.55);letter-spacing:.1em;margin-top:2px;}
+.lpb{margin-left:auto;background:rgba(160,100,255,.2);border:1px solid rgba(180,130,255,.4);border-radius:12px;padding:4px 14px;text-align:center;display:none;}
+.lpn{font-family:'Shippori Mincho',serif;font-size:22px;font-weight:600;color:#c89fff;line-height:1;display:block;}
+.lpl{font-size:9px;color:rgba(200,180,255,.55);letter-spacing:.15em;}
+main{flex:1;overflow-y:auto;z-index:1;padding:24px 16px;}
+.cw{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+.ra{display:flex;align-items:flex-start;gap:10px;animation:fu .35s ease;}
+.ru{display:flex;justify-content:flex-end;animation:fu .35s ease;}
+.av{font-size:22px;flex-shrink:0;margin-top:4px;}
+.ba{background:rgba(60,30,100,.55);border:1px solid rgba(180,130,255,.25);border-radius:4px 18px 18px 18px;padding:14px 18px;max-width:80%;line-height:1.75;font-size:14.5px;backdrop-filter:blur(8px);}
+.bu{background:rgba(100,60,200,.45);border:1px solid rgba(180,140,255,.35);border-radius:18px 4px 18px 18px;padding:12px 16px;max-width:72%;line-height:1.7;font-size:14.5px;color:#f0eaff;}
+.dots span{display:inline-block;animation:db 1.2s infinite;font-size:10px;margin:0 2px;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+footer{z-index:10;background:rgba(15,12,26,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(180,130,255,.15);padding:14px 16px 18px;}
+.ir{max-width:680px;margin:0 auto;display:flex;gap:10px;align-items:flex-end;}
+textarea{flex:1;background:rgba(40,20,70,.7);border:1px solid rgba(160,110,255,.35);border-radius:14px;padding:12px 16px;color:#e8e0f5;font-size:14px;resize:none;outline:none;font-family:'Zen Kaku Gothic New',sans-serif;line-height:1.6;}
+button{background:linear-gradient(135deg,#9b6dff,#6b9fff);border:none;border-radius:14px;padding:12px 22px;color:#fff;font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+.hint{max-width:680px;margin:8px auto 0;font-size:11px;color:rgba(180,160,220,.4);text-align:center;}
+@keyframes db{0%,80%,100%{transform:translateY(0);opacity:.4;}40%{transform:translateY(-6px);opacity:1;}}
+@keyframes fu{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header>
+  <div class="hi">
+    <span class="icon">🌙</span>
+    <div><div class="ttl">数秘 × 内観</div><div class="sub">自分再発見コーチング</div></div>
+    <div class="lpb" id="lpb"><span class="lpn" id="lpn"></span><span class="lpl">LP</span></div>
+  </div>
+</header>
+<main><div class="cw" id="chat"></div></main>
+<footer>
+  <div class="ir">
+    <textarea id="inp" rows="2" placeholder="気持ちを自由に話してください…"></textarea>
+    <button id="btn" onclick="send()">送る</button>
+  </div>
+  <p class="hint">Enterで送信　／　Shift+Enterで改行</p>
+</footer>
+<script>
+const API_KEY = "AQ.Ab8RN6LHrR_-RqXid7RAuJ8ETw1e-F-P0nMRIMZ8MeqoAbno8w";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+
+let history = [];
+let lpNum = null;
+
+function calcLP(s){
+  const d=s.replace(/\D/g,'').split('').map(Number);
+  let n=d.reduce((a,b)=>a+b,0);
+  while(n>9&&n!==11&&n!==22&&n!==33)n=String(n).split('').reduce((a,b)=>a+Number(b),0);
+  return n;
+}
+function lpM(n){
+  const m={1:'独立心・先駆者',2:'協調・感受性',3:'表現・創造',4:'堅実・努力',5:'自由・変化',6:'愛情・責任',7:'内省・探求',8:'力・達成',9:'奉仕・完成',11:'直感・啓示',22:'大いなる建設者',33:'マスター・無条件の愛'};
+  return m[n]||'深い個性';
+}
+function getDate(t){
+  const m=t.match(/(\d{4})[年\/\-](\d{1,2})[月\/\-](\d{1,2})/);
+  if(m)return m[1]+m[2].padStart(2,'0')+m[3].padStart(2,'0');
+  return null;
+}
+function sysPrompt(){
+  const lp=lpNum?`ユーザーのライフパスナンバーは${lpNum}（${lpM(lpNum)}）です。`:'';
+  return `あなたは「数秘×内観×ニュートラル思考」を使ってユーザーの自己理解を深める壁打ちコーチです。${lp}
+アドバイスを押し付けない。正解を出さない。1回の返信で質問は1つまで。
+返答構造：①共感1〜2行 ②数秘の気づき（あれば短く） ③内観整理（箇条書き3つ以内） ④問いかけ1つ
+解決策を押し付けない。断定しない。温かく簡潔な日本語で。`;
+}
+function md(t){
+  return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+}
+function bubble(role,html){
+  const w=document.createElement('div');
+  w.className=role==='user'?'ru':'ra';
+  if(role==='ai'){const a=document.createElement('div');a.className='av';a.textContent='🌸';w.appendChild(a);}
+  const b=document.createElement('div');
+  b.className=role==='user'?'bu':'ba';
+  b.innerHTML=html;
+  w.appendChild(b);
+  document.getElementById('chat').appendChild(w);
+  w.scrollIntoView({behavior:'smooth'});
+  return b;
+}
+window.onload=()=>{
+  bubble('ai','こんにちは。✨<br><br>このコーチングは、あなたの内側を整理して<strong>「本音に気づく」</strong>ための時間です。<br><br>数秘の視点も使いたい場合は、誕生日を教えてください。<br>（例：1990年3月15日）<br><br><strong>今、どんなことが一番モヤモヤしていますか？</strong>');
+};
+document.getElementById('inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
+});
+async function send(){
+  const inp=document.getElementById('inp');
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  document.getElementById('btn').disabled=true;
+  const date=getDate(text);
+  if(date&&!lpNum){
+    lpNum=calcLP(date);
+    document.getElementById('lpn').textContent=lpNum;
+    document.getElementById('lpb').style.display='block';
+  }
+  bubble('user',md(text));
+  history.push({role:'user',parts:[{text}]});
+  const load=bubble('ai','<span class="dots"><span>●</span><span>●</span><span>●</span></span>');
+  try{
+    const body={
+      system_instruction:{parts:[{text:sysPrompt()}]},
+      contents:history
+    };
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await res.json();
+    const reply=data?.candidates?.[0]?.content?.parts?.[0]?.text||'少し考えさせてください…';
+    load.innerHTML=md(reply);
+    history.push({role:'model',parts:[{text:reply}]});
+  }catch(e){
+    load.innerHTML='申し訳ありません、接続に問題が起きました。';
+  }
+  document.getElementById('btn').disabled=false;
+}
+</script>
+</body>
+</html>
