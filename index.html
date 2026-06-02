@@ -99,10 +99,22 @@ function bubble(role,html){
 }
 function speak(btn){
   const text=btn.parentElement.innerText.replace('🔊','').trim();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='ja-JP';
   speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+  const trySpeak=()=>{
+    const voices=speechSynthesis.getVoices();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='ja-JP';
+    u.pitch=1.2;
+    u.rate=1.0;
+    const female=voices.find(v=>v.lang==='ja-JP'&&!/ichiro/i.test(v.name))||voices.find(v=>v.lang.startsWith('ja'));
+    if(female)u.voice=female;
+    speechSynthesis.speak(u);
+  };
+  if(speechSynthesis.getVoices().length===0){
+    speechSynthesis.onvoiceschanged=trySpeak;
+  }else{
+    trySpeak();
+  }
 }
 window.onload=()=>{
   bubble('ai','こんにちは。✨<br><br>このコーチングは、あなたの内側を整理して<strong>「本音に気づく」</strong>ための時間です。<br><br>数秘の視点も使いたい場合は、誕生日を教えてください。<br>（例：1990年3月15日）<br><br><strong>今、どんなことが一番モヤモヤしていますか？</strong>');
