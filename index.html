@@ -1,4 +1,4 @@
-<!DOCTYPE html>　
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -27,6 +27,8 @@ main{flex:1;overflow-y:auto;z-index:1;padding:24px 16px;}
 .dots span{display:inline-block;animation:db 1.2s infinite;font-size:10px;margin:0 2px;}
 .dots span:nth-child(2){animation-delay:.2s;}
 .dots span:nth-child(3){animation-delay:.4s;}
+.spk{background:none;border:none;cursor:pointer;font-size:16px;margin-left:8px;padding:0;opacity:.7;vertical-align:middle;}
+.spk:hover{opacity:1;}
 footer{z-index:10;background:rgba(15,12,26,.92);backdrop-filter:blur(12px);border-top:1px solid rgba(180,130,255,.15);padding:14px 16px 18px;}
 .ir{max-width:680px;margin:0 auto;display:flex;gap:10px;align-items:flex-end;}
 textarea{flex:1;background:rgba(40,20,70,.7);border:1px solid rgba(160,110,255,.35);border-radius:14px;padding:12px 16px;color:#e8e0f5;font-size:14px;resize:none;outline:none;font-family:'Zen Kaku Gothic New',sans-serif;line-height:1.6;}
@@ -55,11 +57,9 @@ button:disabled{opacity:.5;cursor:not-allowed;}
   <p class="hint">Enterで送信　／　Shift+Enterで改行</p>
 </footer>
 <script>
-
 const API_URL = "/api/chat";
 let lpNum = null;
 let history = [];
-
 function calcLP(s){
   const d=s.replace(/\D/g,'').split('').map(Number);
   let n=d.reduce((a,b)=>a+b,0);
@@ -97,6 +97,13 @@ function bubble(role,html){
   w.scrollIntoView({behavior:'smooth'});
   return b;
 }
+function speak(btn){
+  const text=btn.parentElement.innerText.replace('🔊','').trim();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ja-JP';
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
 window.onload=()=>{
   bubble('ai','こんにちは。✨<br><br>このコーチングは、あなたの内側を整理して<strong>「本音に気づく」</strong>ための時間です。<br><br>数秘の視点も使いたい場合は、誕生日を教えてください。<br>（例：1990年3月15日）<br><br><strong>今、どんなことが一番モヤモヤしていますか？</strong>');
 };
@@ -126,7 +133,7 @@ async function send(){
     const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await res.json();
     const reply=data?.candidates?.[0]?.content?.parts?.[0]?.text||'少し考えさせてください…';
-    load.innerHTML=md(reply);
+    load.innerHTML=md(reply)+'<button class="spk" onclick="speak(this)">🔊</button>';
     history.push({role:'model',parts:[{text:reply}]});
   }catch(e){
     load.innerHTML='申し訳ありません、接続に問題が起きました。';
